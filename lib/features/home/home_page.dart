@@ -136,12 +136,14 @@ class HomePage extends ConsumerWidget {
 
 
 
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Hello, ${data?['name']} 🌸',
@@ -323,7 +325,6 @@ class HomePage extends ConsumerWidget {
                   ),
 
                   const SizedBox(height: 20),
-                  const SizedBox(height: 20),
 
                   if (savingsGoal > 0)
                     Card(
@@ -342,12 +343,26 @@ class HomePage extends ConsumerWidget {
 
                             const SizedBox(height: 16),
 
-                            Text(
-                              'Goal: ${savingsGoal.toStringAsFixed(0)} DT',
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Goal'),
+                                Text(
+                                  '${savingsGoal.toStringAsFixed(0)} DT',
+                                ),
+                              ],
                             ),
 
-                            Text(
-                              'Current: ${remaining.toStringAsFixed(0)} DT',
+                            const SizedBox(height: 8),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Current'),
+                                Text(
+                                  '${remaining.toStringAsFixed(0)} DT',
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 16),
