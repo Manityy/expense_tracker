@@ -125,13 +125,27 @@ class HomePage extends ConsumerWidget {
             final totalExpenses = expenseSnapshot.data!;
             final remaining = salary - totalExpenses;
             final savingsGoal =
-            (data?['savingsGoal'] ?? 0).toDouble();
+            ((data?['savingsGoal'] ?? 0) as num).toDouble();
             final goalProgress = savingsGoal > 0
           ? (remaining / savingsGoal).clamp(0, 1).toDouble()
     : 0.0;
 
             final usagePercentage =
             salary > 0 ? (totalExpenses / salary) * 100 : 0;
+            final goalDifference = remaining - savingsGoal;
+
+            String savingsInsight;
+
+            if (savingsGoal <= 0) {
+              savingsInsight =
+              '💰 Set a savings goal to start tracking your progress.';
+            } else if (goalDifference >= 0) {
+              savingsInsight =
+              '🎉 You exceeded your savings goal by ${goalDifference.toStringAsFixed(0)} DT.';
+            } else {
+              savingsInsight =
+              '💪 You need ${goalDifference.abs().toStringAsFixed(0)} DT more to reach your goal.';
+            }
 
 
 
@@ -388,6 +402,41 @@ class HomePage extends ConsumerWidget {
                         ),
                       ),
                     ),
+                  const SizedBox(height: 20),
+
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            '💡 Smart Insights',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          Text(
+                            '💸 You spent ${usagePercentage.toStringAsFixed(1)}% of your income this month.',
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(
+                            '🌱 You currently have ${remaining.toStringAsFixed(0)} DT available.',
+                          ),
+
+                          const SizedBox(height: 8),
+
+                          Text(savingsInsight),
+                        ],
+                      ),
+                    ),
+                  ),
 
 
                   const Text(
