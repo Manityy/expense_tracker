@@ -449,7 +449,6 @@ class _HistoryTile extends StatelessWidget {
     );
   }
 }
-
 class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -487,3 +486,4 @@ class _EmptyState extends StatelessWidget {
     );
   }
 }
+
