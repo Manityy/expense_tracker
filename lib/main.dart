@@ -4,9 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'firebase_options.dart';
 import 'app/app.dart';
+import 'utils/env_config.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await EnvConfig.load();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

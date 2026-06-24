@@ -23,6 +23,14 @@ class AuthService {
     );
   }
 
+  Future<void> sendPasswordResetEmail(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
+  Future<void> deleteCurrentUser() async {
+    await _auth.currentUser?.delete();
+  }
+
   Future<void> logout() async {
     await _auth.signOut();
   }

@@ -6,6 +6,7 @@ class ExpenseCard extends StatelessWidget {
   final String amount;
   final String icon;
   final Color color;
+  final String? dateLabel;
 
   const ExpenseCard({
     super.key,
@@ -14,6 +15,7 @@ class ExpenseCard extends StatelessWidget {
     required this.amount,
     required this.icon,
     required this.color,
+    this.dateLabel,
   });
 
   @override
@@ -50,7 +52,13 @@ class ExpenseCard extends StatelessWidget {
                   ),
                 ),
 
-                Text(category),
+                Text(
+                  dateLabel != null ? '$category · $dateLabel' : category,
+                  style: TextStyle(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    fontSize: 13,
+                  ),
+                ),
               ],
             ),
           ),
