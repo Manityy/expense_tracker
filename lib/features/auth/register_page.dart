@@ -4,6 +4,7 @@ import '../../services/auth_service.dart';
 import '../../models/user_model.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/tunisian_motif.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -39,21 +40,23 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: Colors.transparent,
         title: const Text('Create account'),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Join Flousi 🌸',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Start tracking expenses with AI-powered insights',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
+      body: TunisianMotifBackground(
+        showMinaret: false,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Join Flousi',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'فلوسي — Start tracking in DT',
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
               const SizedBox(height: 28),
               TextField(
                 controller: nameController,
@@ -168,6 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -7,6 +7,8 @@ import '../subscriptions/subscriptions_page.dart';
 import '../profile/profile_page.dart';
 import '../../providers/data_providers.dart';
 import '../../services/app_background_service.dart';
+import '../../utils/app_colors.dart';
+import '../../widgets/tunisian_motif.dart';
 
 class MainNavigationPage extends ConsumerStatefulWidget {
   const MainNavigationPage({super.key});
@@ -43,7 +45,10 @@ class _MainNavigationPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[selectedIndex],
+      backgroundColor: AppColors.background,
+      body: FlousiBackground(
+        child: pages[selectedIndex],
+      ),
 
       bottomNavigationBar: NavigationBar(
         selectedIndex: selectedIndex,

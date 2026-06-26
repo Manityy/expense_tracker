@@ -32,27 +32,27 @@ class CategoryUtils {
   static Color getColor(String category) {
     switch (category) {
       case 'Rent':
-        return AppColors.lavender;
+        return AppColors.terracotta;
       case 'Bills':
-        return AppColors.blue;
+        return AppColors.mediterranean;
       case 'Food':
-        return AppColors.yellow;
+        return AppColors.saffron;
       case 'Groceries':
-        return AppColors.sage;
+        return AppColors.olive;
       case 'Transport':
-        return AppColors.blue;
+        return AppColors.mediterranean;
       case 'Entertainment':
-        return AppColors.pink;
+        return AppColors.harissaSoft;
       case 'Healthcare':
-        return AppColors.sage;
+        return AppColors.mint;
       case 'Education':
-        return AppColors.lavender;
+        return AppColors.saffron;
       case 'Shopping':
-        return AppColors.pink;
+        return AppColors.terracotta;
       case 'Savings':
-        return AppColors.sage;
+        return AppColors.olive;
       default:
-        return Colors.white;
+        return AppColors.yellow;
     }
   }
 }

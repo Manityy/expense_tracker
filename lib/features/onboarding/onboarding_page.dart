@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/tunisian_motif.dart';
 import '../navigation/main_navigation_page.dart';
 import '../profile/category_budgets_page.dart';
 
@@ -87,73 +88,76 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-              child: Row(
-                children: List.generate(3, (i) {
-                  return Expanded(
-                    child: Container(
-                      height: 4,
-                      margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
-                      decoration: BoxDecoration(
-                        color: i <= _step
-                            ? AppColors.lavender
-                            : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(4),
+      body: TunisianMotifBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                child: Row(
+                  children: List.generate(3, (i) {
+                    return Expanded(
+                      child: Container(
+                        height: 4,
+                        margin: EdgeInsets.only(right: i < 2 ? 8 : 0),
+                        decoration: BoxDecoration(
+                          color: i <= _step
+                              ? AppColors.sidiBlue
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    );
+                  }),
+                ),
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  onPageChanged: (i) => setState(() => _step = i),
+                  children: [
+                    _WelcomeStep(name: widget.userName),
+                    _SalaryStep(controller: _salaryController),
+                    _SavingsStep(controller: _savingsController),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: FilledButton(
+                        onPressed: _isSaving
+                            ? null
+                            : () {
+                                if (_step < 2) {
+                                  _next();
+                                } else {
+                                  _finish();
+                                }
+                              },
+                        child: _isSaving
+                            ? const CircularProgressIndicator(strokeWidth: 2)
+                            : Text(_step < 2 ? 'Continue' : 'Finish setup'),
                       ),
                     ),
-                  );
-                }),
-              ),
-            ),
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                onPageChanged: (i) => setState(() => _step = i),
-                children: [
-                  _WelcomeStep(name: widget.userName),
-                  _SalaryStep(controller: _salaryController),
-                  _SavingsStep(controller: _savingsController),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: FilledButton(
-                      onPressed: _isSaving
-                          ? null
-                          : () {
-                              if (_step < 2) {
-                                _next();
-                              } else {
-                                _finish();
-                              }
-                            },
-                      child: _isSaving
-                          ? const CircularProgressIndicator(strokeWidth: 2)
-                          : Text(_step < 2 ? 'Continue' : 'Finish setup'),
-                    ),
-                  ),
-                  if (_step == 2) ...[
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _isSaving ? null : () => _finish(skipBudgets: true),
-                      child: const Text('Skip budget setup for now'),
-                    ),
+                    if (_step == 2) ...[
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed:
+                            _isSaving ? null : () => _finish(skipBudgets: true),
+                        child: const Text('Skip budget setup for now'),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -177,7 +181,10 @@ class _WelcomeStep extends StatelessWidget {
             height: 100,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.lavender, AppColors.blue.withValues(alpha: 0.8)],
+                colors: [
+                  AppColors.saffron,
+                  AppColors.mediterranean.withValues(alpha: 0.85),
+                ],
               ),
               shape: BoxShape.circle,
             ),
@@ -185,9 +192,18 @@ class _WelcomeStep extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           Text(
-            'Welcome to Flousi, $name! 🌸',
+            'Ahlan fi Flousi, $name!',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'فلوسي — barra flousk',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.sidiBlue.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 12),
           Text(

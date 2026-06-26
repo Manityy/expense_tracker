@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/analytics_helpers.dart';
+import '../../widgets/tunisian_motif.dart';
 
 class MonthlyTrendPage extends StatefulWidget {
   const MonthlyTrendPage({super.key});
@@ -29,10 +30,13 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('Monthly Trend'),
-      ),
-      body: FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
+      body: FlousiBackground(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            title: const Text('Monthly Trend'),
+          ),
+          body: FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
         key: ValueKey(_reloadToken),
         future: _loadExpenses(),
         builder: (context, snapshot) {
@@ -42,7 +46,8 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
 
           final expenses = snapshot.data ?? [];
           if (expenses.isEmpty) {
-            return _EmptyState(
+            return TunisianEmptyState(
+              embedded: true,
               icon: Icons.show_chart,
               title: 'No spending history yet',
               subtitle: 'Add expenses to see your monthly trends here.',
@@ -203,8 +208,8 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
                                   toY: value,
                                   width: isTouched ? 26 : 22,
                                   color: isCurrent
-                                      ? AppColors.lavender
-                                      : AppColors.blue.withValues(alpha: 0.7),
+                                      ? AppColors.sidiBlue
+                                      : AppColors.mediterranean.withValues(alpha: 0.7),
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(8),
                                   ),
@@ -249,6 +254,8 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
             ),
           );
         },
+          ),
+        ),
       ),
     );
   }
@@ -277,8 +284,8 @@ class _SummaryHero extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.lavender,
-            AppColors.blue.withValues(alpha: 0.85),
+            AppColors.saffron,
+            AppColors.mediterranean.withValues(alpha: 0.85),
           ],
         ),
         borderRadius: BorderRadius.circular(28),
@@ -399,7 +406,7 @@ class _HistoryTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: isLatest
-            ? Border.all(color: AppColors.lavender, width: 2)
+            ? Border.all(color: AppColors.sidiBlue, width: 2)
             : null,
       ),
       child: Row(
@@ -408,7 +415,7 @@ class _HistoryTile extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: isLatest ? AppColors.lavender : AppColors.blue.withValues(alpha: 0.5),
+              color: isLatest ? AppColors.saffron : AppColors.mediterranean.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(14),
             ),
             child: const Icon(Icons.calendar_month_outlined),
@@ -445,43 +452,6 @@ class _HistoryTile extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-class _EmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _EmptyState({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 64, color: Colors.grey.shade400),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ],
-        ),
       ),
     );
   }

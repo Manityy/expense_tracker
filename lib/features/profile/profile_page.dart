@@ -38,6 +38,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Profile'),
       ),
@@ -372,8 +373,8 @@ class _ProfileHeader extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.lavender,
-            AppColors.blue.withValues(alpha: 0.85),
+            AppColors.sidiBlue,
+            AppColors.sidiBlueLight,
           ],
         ),
         borderRadius: BorderRadius.circular(28),

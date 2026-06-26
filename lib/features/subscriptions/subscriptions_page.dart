@@ -308,6 +308,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Subscriptions'),
       ),

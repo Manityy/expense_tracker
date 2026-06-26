@@ -9,6 +9,7 @@ import '../../utils/expense_date_utils.dart';
 import '../../utils/analytics_helpers.dart';
 import '../../utils/category_utils.dart';
 import '../../models/user_model.dart';
+import '../../widgets/tunisian_motif.dart';
 
 class AnalyticsPage extends StatefulWidget {
   const AnalyticsPage({super.key});
@@ -63,7 +64,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('Analytics'),
       ),
@@ -85,23 +86,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
           final userDoc = data['userDoc'] as DocumentSnapshot<Map<String, dynamic>>;
 
           if (expenses.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey.shade400),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No expenses yet',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Start tracking to unlock analytics.',
-                    style: TextStyle(color: Colors.grey.shade600),
-                  ),
-                ],
-              ),
+            return TunisianEmptyState(
+              embedded: true,
+              icon: Icons.pie_chart_outline,
+              title: 'No expenses yet',
+              subtitle: 'Start tracking to unlock analytics.',
             );
           }
 
@@ -228,7 +217,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         child: _StatCard(
                           label: 'Transactions',
                           value: '${monthExpenses.length}',
-                          color: AppColors.lavender,
+                          color: AppColors.saffron,
                           icon: Icons.receipt_long_outlined,
                         ),
                       ),
@@ -273,13 +262,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   sortedCategories.length,
                                   (i) {
                                     final entry = sortedCategories[i];
-                                    final colors = [
-                                      AppColors.lavender,
-                                      AppColors.pink,
-                                      AppColors.blue,
-                                      AppColors.sage,
-                                      AppColors.yellow,
-                                    ];
+                                    final colors = AppColors.cardPalette;
                                     final isTouched = _touchedCategory == i;
                                     return PieChartSectionData(
                                       value: entry.value,
@@ -438,8 +421,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                   toY: last6[i].value,
                                   width: 18,
                                   color: isSelected
-                                      ? AppColors.pink
-                                      : AppColors.blue.withValues(alpha: 0.65),
+                                      ? AppColors.sidiBlue
+                                      : AppColors.mediterranean.withValues(alpha: 0.65),
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(6),
                                   ),
@@ -472,7 +455,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                             Container(
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: AppColors.lavender,
+                                color: AppColors.saffron,
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               child: const Icon(Icons.insights),
@@ -525,7 +508,7 @@ class _MonthBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.lavender.withValues(alpha: 0.45),
+      color: AppColors.saffron.withValues(alpha: 0.45),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onTap,
@@ -548,7 +531,7 @@ class _MonthBanner extends StatelessWidget {
               Text(
                 'Change',
                 style: TextStyle(
-                  color: Colors.deepPurple.shade900,
+                  color: AppColors.sidiBlue,
                   fontWeight: FontWeight.w600,
                   fontSize: 13,
                 ),

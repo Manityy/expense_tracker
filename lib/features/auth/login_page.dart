@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'register_page.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
+import '../../widgets/tunisian_motif.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -98,37 +99,43 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.lavender,
-                      AppColors.blue.withValues(alpha: 0.85),
-                    ],
+      body: TunisianMotifBackground(
+        showPalm: false,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppColors.sidiBlue,
+                        AppColors.sidiBlueLight,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(22),
                   ),
-                  borderRadius: BorderRadius.circular(22),
+                  child: const Icon(
+                    Icons.account_balance_wallet,
+                    size: 36,
+                    color: Colors.white,
+                  ),
                 ),
-                child: const Icon(Icons.account_balance_wallet, size: 36),
-              ),
-              const SizedBox(height: 28),
-              const Text(
-                'Welcome back',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Sign in to Flousi to track your spending',
-                style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
-              ),
+                const SizedBox(height: 28),
+                const Text(
+                  'Ahlan bik',
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'فلوسي — Sign in to track your spending',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                ),
               const SizedBox(height: 36),
               TextField(
                 controller: emailController,
@@ -213,6 +220,7 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

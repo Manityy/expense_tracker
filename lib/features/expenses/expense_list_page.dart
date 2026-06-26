@@ -7,6 +7,7 @@ import '../../services/firestore_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/category_utils.dart';
 import '../../widgets/expense_card.dart';
+import '../../widgets/tunisian_motif.dart';
 import 'add_expense_page.dart';
 
 class ExpenseListPage extends StatefulWidget {
@@ -141,6 +142,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
     final userId = FirebaseAuth.instance.currentUser!.uid;
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         title: const Text('My Expenses'),
       ),
@@ -173,57 +175,23 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
           final allExpenses = snapshot.data?.docs ?? [];
 
           if (allExpenses.isEmpty) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 88,
-                      height: 88,
-                      decoration: BoxDecoration(
-                        color: AppColors.lavender.withValues(alpha: 0.5),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.receipt_long_outlined,
-                        size: 44,
-                        color: Colors.deepPurple.shade300,
-                      ),
+            return TunisianEmptyState(
+              embedded: true,
+              icon: Icons.receipt_long_outlined,
+              title: 'No expenses yet',
+              subtitle: 'Track your spending by adding your first expense.',
+              showPalm: false,
+              action: FilledButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AddExpensePage(),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'No expenses yet',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Track your spending by adding your first expense.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    FilledButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AddExpensePage(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Expense'),
-                    ),
-                  ],
-                ),
+                  );
+                },
+                icon: const Icon(Icons.add),
+                label: const Text('Add Expense'),
               ),
             );
           }

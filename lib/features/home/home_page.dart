@@ -9,6 +9,7 @@ import '../../utils/expense_date_utils.dart';
 import '../../utils/expense_helpers.dart';
 import '../../utils/finance_helpers.dart';
 import '../../widgets/expense_card.dart';
+import '../../widgets/tunisian_motif.dart';
 import '../ai/conversations_page.dart';
 import '../profile/category_budgets_page.dart';
 
@@ -21,8 +22,27 @@ class HomePage extends ConsumerWidget {
     final expensesAsync = ref.watch(expensesStreamProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Flousi'),
+        title: Row(
+          children: [
+            Text(
+              'Flousi',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.sidiBlue,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              'فلوسي',
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.sidiBlue.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
       ),
       body: userAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -75,18 +95,7 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Hello, ${user.name} 🌸',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      const Text(
-                        'Let’s take care of your money today',
-                        style: TextStyle(color: Colors.grey),
-                      ),
+                      TunisianWelcomeHeader(name: user.name),
                       const SizedBox(height: 20),
                       _buildIncomeSection(
                         salary: salary,
@@ -175,8 +184,11 @@ class HomePage extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: AppColors.yellow,
+            color: AppColors.saffron,
             borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: AppColors.saffronDeep.withValues(alpha: 0.15),
+            ),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +229,7 @@ class HomePage extends ConsumerWidget {
               child: DashboardCard(
                 title: 'Spent this month',
                 value: '${totalExpenses.toStringAsFixed(0)} DT',
-                color: AppColors.pink,
+                color: AppColors.harissaSoft,
                 icon: Icons.payments,
               ),
             ),
@@ -226,7 +238,7 @@ class HomePage extends ConsumerWidget {
               child: DashboardCard(
                 title: 'Left this month',
                 value: '${remaining.toStringAsFixed(0)} DT',
-                color: remaining >= 0 ? AppColors.sage : AppColors.pink,
+                color: remaining >= 0 ? AppColors.olive : AppColors.harissaSoft,
                 icon: Icons.savings,
               ),
             ),
@@ -256,8 +268,11 @@ class HomePage extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.blue.withValues(alpha: 0.55),
+        color: AppColors.mediterranean.withValues(alpha: 0.55),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: AppColors.sidiBlue.withValues(alpha: 0.12),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +366,7 @@ class HomePage extends ConsumerWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.lavender.withValues(alpha: 0.6)),
+        border: Border.all(color: AppColors.sidiBlue.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
