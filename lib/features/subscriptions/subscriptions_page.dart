@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
+import '../../constants/expense_categories.dart';
 import '../../services/firestore_service.dart';
 import '../../models/recurring_expense_model.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/category_l10n.dart';
 
 class SubscriptionsPage extends StatefulWidget {
   const SubscriptionsPage({super.key});
@@ -14,19 +17,7 @@ class SubscriptionsPage extends StatefulWidget {
 class _SubscriptionsPageState extends State<SubscriptionsPage> {
   final firestoreService = FirestoreService();
 
-  final List<String> categories = [
-    'Rent',
-    'Bills',
-    'Food',
-    'Groceries',
-    'Transport',
-    'Entertainment',
-    'Healthcare',
-    'Education',
-    'Shopping',
-    'Savings',
-    'Other'
-  ];
+  final List<String> categories = expenseCategories;
 
   IconData _getCategoryIcon(String category) {
     switch (category) {
@@ -120,6 +111,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       builder: (context) {
+        final l10n = AppLocalizations.of(context)!;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
@@ -145,9 +137,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Add Subscription',
-                      style: TextStyle(
+                    Text(
+                      isEditing ? l10n.editSubscription : l10n.addSubscription,
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
@@ -156,24 +148,24 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                     const SizedBox(height: 20),
                     TextField(
                       controller: titleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Subscription / Title',
-                        hintText: 'e.g. Netflix, Rent, Internet',
+                      decoration: InputDecoration(
+                        labelText: l10n.subscriptionTitleLabel,
+                        hintText: l10n.subscriptionNameHint,
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
                       controller: amountController,
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                        labelText: 'Amount (DT)',
+                      decoration: InputDecoration(
+                        labelText: '${l10n.amount} (DT)',
                         hintText: '0.00',
                       ),
                     ),
                     const SizedBox(height: 16),
                     InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Category',
+                      decoration: InputDecoration(
+                        labelText: l10n.category,
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
@@ -182,7 +174,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                           items: categories.map((cat) {
                             return DropdownMenuItem(
                               value: cat,
-                              child: Text(cat),
+                              child: Text(CategoryL10n.name(l10n, cat)),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -197,8 +189,8 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                     ),
                     const SizedBox(height: 16),
                     InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: 'Day of Month Due',
+                      decoration: InputDecoration(
+                        labelText: l10n.dayOfMonthDue,
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton<int>(
@@ -207,7 +199,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                           items: List.generate(31, (index) => index + 1).map((day) {
                             return DropdownMenuItem(
                               value: day,
-                              child: Text('Day $day'),
+                              child: Text(l10n.dayOfMonth(day)),
                             );
                           }).toList(),
                           onChanged: (val) {
@@ -237,7 +229,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
 
                         if (title.isEmpty || amountText.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please fill in all fields')),
+                            SnackBar(content: Text(l10n.fillAllFields)),
                           );
                           return;
                         }
@@ -245,7 +237,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                         final amount = double.tryParse(amountText);
                         if (amount == null || amount <= 0) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Please enter a valid amount')),
+                            SnackBar(content: Text(l10n.validAmountRequired)),
                           );
                           return;
                         }
@@ -271,8 +263,8 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                               SnackBar(
                                 content: Text(
                                   isEditing
-                                      ? 'Subscription updated'
-                                      : 'Subscription added successfully',
+                                      ? l10n.subscriptionUpdated
+                                      : l10n.subscriptionAdded,
                                 ),
                               ),
                             );
@@ -286,7 +278,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                         }
                       },
                       child: Text(
-                        isEditing ? 'Update Subscription' : 'Add Subscription',
+                        isEditing ? l10n.updateSubscription : l10n.addSubscription,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -306,18 +298,19 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser!.uid;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Subscriptions'),
+        title: Text(l10n.subscriptions),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showSubscriptionBottomSheet(context),
         backgroundColor: AppColors.lavender,
         foregroundColor: Colors.deepPurple.shade900,
         icon: const Icon(Icons.add),
-        label: const Text('Add Subscription'),
+        label: Text(l10n.addSubscription),
         elevation: 2,
       ),
       body: StreamBuilder<List<RecurringExpenseModel>>(
@@ -327,7 +320,9 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading subscriptions: ${snapshot.error}'));
+            return Center(
+              child: Text(l10n.errorLoadingSubscriptions('${snapshot.error}')),
+            );
           }
           final subs = snapshot.data ?? [];
           if (subs.isEmpty) {
@@ -341,18 +336,18 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                     color: Colors.grey.shade400,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'No recurring subscriptions yet',
-                    style: TextStyle(
+                  Text(
+                    l10n.noSubscriptionsYet,
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       color: Colors.grey,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Tap "Add Subscription" to schedule recurring outlays.',
-                    style: TextStyle(
+                  Text(
+                    l10n.noSubscriptionsSubtitle,
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
@@ -376,11 +371,11 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
 
               String dueText = '';
               if (daysLeft == 0) {
-                dueText = 'Due Today';
+                dueText = l10n.dueToday;
               } else if (daysLeft == 1) {
-                dueText = 'Due Tomorrow';
+                dueText = l10n.dueTomorrow;
               } else {
-                dueText = 'Due in $daysLeft days';
+                dueText = l10n.dueInDays(daysLeft);
               }
 
               final catColor = _getCategoryColor(sub.category);
@@ -421,7 +416,7 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Day ${sub.dayOfMonth} of month • $dueText',
+                              '${l10n.dayOfMonthDetail(sub.dayOfMonth)} • $dueText',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: daysLeft <= 3
@@ -451,17 +446,18 @@ class _SubscriptionsPageState extends State<SubscriptionsPage> {
                               final confirm = await showDialog<bool>(
                                 context: context,
                                 builder: (context) => AlertDialog(
-                                  title: const Text('Delete Subscription'),
+                                  title: Text(l10n.deleteSubscription),
                                   content: Text(
-                                      'Are you sure you want to remove the recurring payment for "${sub.title}"?'),
+                                    l10n.deleteSubscriptionNamed(sub.title),
+                                  ),
                                   actions: [
                                     TextButton(
                                       onPressed: () => Navigator.pop(context, false),
-                                      child: const Text('Cancel'),
+                                      child: Text(l10n.cancel),
                                     ),
                                     TextButton(
                                       onPressed: () => Navigator.pop(context, true),
-                                      child: const Text('Delete'),
+                                      child: Text(l10n.delete),
                                     ),
                                   ],
                                 ),

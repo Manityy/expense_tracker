@@ -1,3 +1,7 @@
+import 'package:expense_tracker/l10n/app_localizations.dart';
+
+import 'category_l10n.dart';
+
 class FinanceInsight {
   final String emoji;
   final String title;
@@ -113,6 +117,97 @@ class FinanceHelpers {
         title: 'On track this month',
         message:
             'You could finish with about ${forecast.projectedRemaining.toStringAsFixed(0)} DT remaining if you keep this pace.',
+      );
+    }
+
+    return null;
+  }
+
+  static FinanceInsight? generateLocalizedInsight({
+    required AppLocalizations l10n,
+    required double salary,
+    required double monthSpent,
+    required Map<String, double> categorySpending,
+    required Map<String, double> categoryBudgets,
+    required MonthForecast forecast,
+  }) {
+    for (final entry in categoryBudgets.entries) {
+      if (entry.value <= 0) continue;
+      final spent = categorySpending[entry.key] ?? 0;
+      final ratio = spent / entry.value;
+      final cat = CategoryL10n.name(l10n, entry.key);
+      if (ratio >= 1) {
+        return FinanceInsight(
+          emoji: '🚨',
+          title: l10n.insightBudgetExceededTitle(cat),
+          message: l10n.insightBudgetExceededMsg(
+            spent.toStringAsFixed(0),
+            entry.value.toStringAsFixed(0),
+            cat,
+          ),
+        );
+      }
+      if (ratio >= 0.8) {
+        return FinanceInsight(
+          emoji: '⚠️',
+          title: l10n.insightBudgetWarningTitle(
+            cat,
+            (ratio * 100).toStringAsFixed(0),
+          ),
+          message: l10n.insightBudgetWarningMsg(
+            (entry.value - spent).toStringAsFixed(0),
+            cat,
+          ),
+        );
+      }
+    }
+
+    if (salary > 0 && forecast.projectedSpend > salary) {
+      return FinanceInsight(
+        emoji: '📉',
+        title: l10n.insightHighPaceTitle,
+        message: l10n.insightHighPaceMsg(
+          forecast.dailyAverage.toStringAsFixed(0),
+          (forecast.projectedSpend - salary).toStringAsFixed(0),
+        ),
+      );
+    }
+
+    if (categorySpending.isNotEmpty) {
+      final top = categorySpending.entries.reduce(
+        (a, b) => a.value >= b.value ? a : b,
+      );
+      if (top.value > 0) {
+        final cat = CategoryL10n.name(l10n, top.key);
+        return FinanceInsight(
+          emoji: '💡',
+          title: l10n.insightTopCategoryTitle(cat),
+          message: l10n.insightTopCategoryMsg(
+            cat,
+            top.value.toStringAsFixed(0),
+            monthSpent > 0
+                ? ((top.value / monthSpent) * 100).toStringAsFixed(0)
+                : '0',
+          ),
+        );
+      }
+    }
+
+    if (monthSpent == 0) {
+      return FinanceInsight(
+        emoji: '🌱',
+        title: l10n.insightFreshStartTitle,
+        message: l10n.insightFreshStartMsg,
+      );
+    }
+
+    if (forecast.projectedRemaining >= 0 && salary > 0) {
+      return FinanceInsight(
+        emoji: '✅',
+        title: l10n.insightOnTrackTitle,
+        message: l10n.insightOnTrackMsg(
+          forecast.projectedRemaining.toStringAsFixed(0),
+        ),
       );
     }
 

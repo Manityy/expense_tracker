@@ -3,6 +3,7 @@ import 'register_page.dart';
 import '../../services/auth_service.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/tunisian_motif.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -48,21 +49,23 @@ class _LoginPageState extends State<LoginPage> {
 
     await showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Reset password'),
+        title: Text(l10n.resetPassword),
         content: TextField(
           controller: resetEmailController,
           keyboardType: TextInputType.emailAddress,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            prefixIcon: Icon(Icons.email_outlined),
+          decoration: InputDecoration(
+            labelText: l10n.email,
+            prefixIcon: const Icon(Icons.email_outlined),
           ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.cancel),
           ),
           FilledButton(
             onPressed: () async {
@@ -70,26 +73,27 @@ class _LoginPageState extends State<LoginPage> {
               if (email.isEmpty) return;
               try {
                 await authService.sendPasswordResetEmail(email);
-                if (context.mounted) {
-                  Navigator.pop(context);
+                if (dialogContext.mounted) {
+                  Navigator.pop(dialogContext);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Password reset email sent. Check your inbox.'),
+                    SnackBar(
+                      content: Text(l10n.passwordResetSent),
                     ),
                   );
                 }
               } catch (e) {
-                if (context.mounted) {
+                if (dialogContext.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(_friendlyAuthError(e))),
                   );
                 }
               }
             },
-            child: const Text('Send link'),
+            child: Text(l10n.sendLink),
           ),
         ],
-      ),
+      );
+      },
     );
 
     resetEmailController.dispose();
@@ -97,6 +101,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: TunisianMotifBackground(
@@ -127,13 +133,13 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 const SizedBox(height: 28),
-                const Text(
-                  'Ahlan bik',
-                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                Text(
+                  l10n.welcomeBack,
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'فلوسي — Sign in to track your spending',
+                  l10n.signInSubtitle,
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
                 ),
               const SizedBox(height: 36),
@@ -167,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: _showForgotPasswordDialog,
-                  child: const Text('Forgot password?'),
+                  child: Text(l10n.forgotPassword),
                 ),
               ),
               const SizedBox(height: 12),
@@ -200,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: 22,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
-                      : const Text('Sign in'),
+                      : Text(l10n.signIn),
                 ),
               ),
               const SizedBox(height: 16),
@@ -214,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     );
                   },
-                  child: const Text('Create an account'),
+                  child: Text(l10n.createAccount),
                 ),
               ),
             ],

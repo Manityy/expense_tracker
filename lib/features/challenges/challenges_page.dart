@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/challenges_helper.dart';
@@ -42,9 +43,10 @@ class _ChallengesPageState extends State<ChallengesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Savings Challenges'),
+        title: Text(l10n.savingsChallenges),
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _loadData(),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/analytics_helpers.dart';
 import '../../widgets/tunisian_motif.dart';
@@ -28,13 +29,15 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     return Scaffold(
       backgroundColor: AppColors.background,
       body: FlousiBackground(
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: const Text('Monthly Trend'),
+            title: Text(l10n.monthlyTrend),
           ),
           body: FutureBuilder<List<QueryDocumentSnapshot<Map<String, dynamic>>>>(
         key: ValueKey(_reloadToken),
@@ -49,8 +52,8 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
             return TunisianEmptyState(
               embedded: true,
               icon: Icons.show_chart,
-              title: 'No spending history yet',
-              subtitle: 'Add expenses to see your monthly trends here.',
+              title: l10n.noSpendingHistory,
+              subtitle: l10n.noSpendingHistorySubtitle,
             );
           }
 
@@ -83,15 +86,19 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SummaryHero(
-                    monthLabel: AnalyticsHelpers.formatMonthKey(currentMonth.key),
+                    l10n: l10n,
+                    monthLabel: AnalyticsHelpers.formatMonthKey(
+                      currentMonth.key,
+                      locale,
+                    ),
                     amount: currentMonth.value,
                     monthChange: monthChange,
                     avgMonthly: avgMonthly,
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Last 6 months',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.lastSixMonths,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -180,6 +187,7 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
                                     child: Text(
                                       AnalyticsHelpers.formatMonthKey(
                                         last6[i].key,
+                                        locale,
                                       ).replaceAll("'", "'\n"),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
@@ -227,9 +235,9 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
                     ),
                   ),
                   const SizedBox(height: 28),
-                  const Text(
-                    'All months',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.allMonths,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   ...allMonths.asMap().entries.map((entry) {
@@ -243,7 +251,11 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
                       change = ((month.value - prev) / prev) * 100;
                     }
                     return _HistoryTile(
-                      monthLabel: AnalyticsHelpers.formatMonthKeyLong(month.key),
+                      l10n: l10n,
+                      monthLabel: AnalyticsHelpers.formatMonthKeyLong(
+                        month.key,
+                        locale,
+                      ),
                       amount: month.value,
                       changePercent: change,
                       isLatest: index == 0,
@@ -262,12 +274,14 @@ class _MonthlyTrendPageState extends State<MonthlyTrendPage> {
 }
 
 class _SummaryHero extends StatelessWidget {
+  final AppLocalizations l10n;
   final String monthLabel;
   final double amount;
   final double? monthChange;
   final double avgMonthly;
 
   const _SummaryHero({
+    required this.l10n,
     required this.monthLabel,
     required this.amount,
     required this.monthChange,
@@ -316,7 +330,7 @@ class _SummaryHero extends StatelessWidget {
                   icon: monthChange! <= 0
                       ? Icons.trending_down
                       : Icons.trending_up,
-                  label: 'vs last month',
+                  label: l10n.vsLastMonth,
                   value: '${monthChange!.abs().toStringAsFixed(0)}%',
                   positive: monthChange! <= 0,
                 ),
@@ -325,7 +339,7 @@ class _SummaryHero extends StatelessWidget {
               Expanded(
                 child: _MiniStat(
                   icon: Icons.analytics_outlined,
-                  label: '6-mo average',
+                  label: l10n.sixMonthAverage,
                   value: '${avgMonthly.toStringAsFixed(0)} DT',
                   positive: true,
                 ),
@@ -385,12 +399,14 @@ class _MiniStat extends StatelessWidget {
 }
 
 class _HistoryTile extends StatelessWidget {
+  final AppLocalizations l10n;
   final String monthLabel;
   final double amount;
   final double? changePercent;
   final bool isLatest;
 
   const _HistoryTile({
+    required this.l10n,
     required this.monthLabel,
     required this.amount,
     required this.changePercent,
@@ -432,8 +448,8 @@ class _HistoryTile extends StatelessWidget {
                 if (changePercent != null)
                   Text(
                     changePercent! <= 0
-                        ? '↓ ${changePercent!.abs().toStringAsFixed(0)}% vs previous'
-                        : '↑ ${changePercent!.toStringAsFixed(0)}% vs previous',
+                        ? '↓ ${l10n.vsPrevious('${changePercent!.abs().toStringAsFixed(0)}%')}'
+                        : '↑ ${l10n.vsPrevious('${changePercent!.toStringAsFixed(0)}%')}',
                     style: TextStyle(
                       fontSize: 12,
                       color: changePercent! <= 0

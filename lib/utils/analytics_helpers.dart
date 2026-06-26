@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 import 'expense_date_utils.dart';
 
 class AnalyticsHelpers {
@@ -37,33 +39,26 @@ class AnalyticsHelpers {
     return result;
   }
 
-  static String formatMonthKey(String key) {
+  static String formatMonthKey(String key, [String? locale]) {
     try {
       final parts = key.split('-');
       if (parts.length < 2) return key;
-      final year = parts[0].substring(2);
+      final year = int.parse(parts[0]);
       final month = int.parse(parts[1]);
-      const names = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ];
-      return "${names[month - 1]} '$year";
+      final date = DateTime(year, month);
+      return DateFormat("MMM ''yy", locale).format(date);
     } catch (_) {
       return key;
     }
   }
 
-  static String formatMonthKeyLong(String key) {
+  static String formatMonthKeyLong(String key, [String? locale]) {
     try {
       final parts = key.split('-');
       if (parts.length < 2) return key;
+      final year = int.parse(parts[0]);
       final month = int.parse(parts[1]);
-      final year = parts[0];
-      const names = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December',
-      ];
-      return '${names[month - 1]} $year';
+      return ExpenseDateUtils.monthLabel(DateTime(year, month), locale);
     } catch (_) {
       return key;
     }

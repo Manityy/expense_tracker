@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../home/home_page.dart';
 import '../expenses/expense_list_page.dart';
 import '../expenses/analytics_page.dart';
@@ -7,7 +8,6 @@ import '../subscriptions/subscriptions_page.dart';
 import '../profile/profile_page.dart';
 import '../../providers/data_providers.dart';
 import '../../services/app_background_service.dart';
-import '../../utils/app_colors.dart';
 import '../../widgets/tunisian_motif.dart';
 
 class MainNavigationPage extends ConsumerStatefulWidget {
@@ -44,8 +44,10 @@ class _MainNavigationPageState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: FlousiBackground(
         child: pages[selectedIndex],
       ),
@@ -59,35 +61,31 @@ class _MainNavigationPageState
           });
         },
 
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.navHome,
           ),
-
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long),
-            label: 'Expenses',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long),
+            label: l10n.navExpenses,
           ),
-
           NavigationDestination(
-            icon: Icon(Icons.pie_chart_outline),
-            selectedIcon: Icon(Icons.pie_chart),
-            label: 'Analytics',
+            icon: const Icon(Icons.pie_chart_outline),
+            selectedIcon: const Icon(Icons.pie_chart),
+            label: l10n.navAnalytics,
           ),
-
           NavigationDestination(
-            icon: Icon(Icons.repeat_outlined),
-            selectedIcon: Icon(Icons.repeat),
-            label: 'Subs',
+            icon: const Icon(Icons.repeat_outlined),
+            selectedIcon: const Icon(Icons.repeat),
+            label: l10n.navSubscriptions,
           ),
-
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline),
+            selectedIcon: const Icon(Icons.person),
+            label: l10n.navProfile,
           ),
         ],
       ),

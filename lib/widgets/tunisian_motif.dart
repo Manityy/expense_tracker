@@ -216,8 +216,11 @@ class FlousiBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scale = intensity == TunisianMotifIntensity.subtle ? 1.0 : 1.35;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return DecoratedBox(
-      decoration: const BoxDecoration(gradient: AppColors.surfaceGradient),
+      decoration: BoxDecoration(
+        gradient: isDark ? AppColors.darkSurfaceGradient : AppColors.surfaceGradient,
+      ),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -250,7 +253,11 @@ class TunisianMotifBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(gradient: AppColors.surfaceGradient),
+      decoration: BoxDecoration(
+        gradient: Theme.of(context).brightness == Brightness.dark
+            ? AppColors.darkSurfaceGradient
+            : AppColors.surfaceGradient,
+      ),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -272,13 +279,13 @@ class TunisianMotifBackground extends StatelessWidget {
 
 /// Sidi Bou Said–inspired welcome header with arched blue frame.
 class TunisianWelcomeHeader extends StatelessWidget {
-  final String name;
-  final String? subtitle;
+  final String greeting;
+  final String subtitle;
 
   const TunisianWelcomeHeader({
     super.key,
-    required this.name,
-    this.subtitle,
+    required this.greeting,
+    required this.subtitle,
   });
 
   @override
@@ -360,7 +367,7 @@ class TunisianWelcomeHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 14),
                   Text(
-                    'Ahlan, $name',
+                    greeting,
                     style: const TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -369,7 +376,7 @@ class TunisianWelcomeHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    subtitle ?? 'Flousk fi yedek, take care of your money today.',
+                    subtitle,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.white.withValues(alpha: 0.88),

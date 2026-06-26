@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
+import '../../constants/expense_categories.dart';
 import '../../services/firestore_service.dart';
 import '../../models/user_model.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/category_l10n.dart';
 
 class CategoryBudgetsPage extends StatefulWidget {
   const CategoryBudgetsPage({super.key});
@@ -16,19 +19,7 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
   final firestoreService = FirestoreService();
   final String userId = FirebaseAuth.instance.currentUser!.uid;
 
-  final List<String> categories = [
-    'Rent',
-    'Bills',
-    'Food',
-    'Groceries',
-    'Transport',
-    'Entertainment',
-    'Healthcare',
-    'Education',
-    'Shopping',
-    'Savings',
-    'Other'
-  ];
+  final List<String> categories = expenseCategories;
 
   final Map<String, TextEditingController> _controllers = {};
   bool _isLoading = true;
@@ -89,8 +80,9 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading budgets: $e')),
+          SnackBar(content: Text(l10n.errorLoadingBudgets('$e'))),
         );
       }
     } finally {
@@ -121,15 +113,17 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
     try {
       await firestoreService.updateCategoryBudgets(userId, updatedBudgets);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Category budgets saved successfully!')),
+          SnackBar(content: Text(l10n.budgetsSaved)),
         );
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving budgets: $e')),
+          SnackBar(content: Text(l10n.errorSavingBudgets('$e'))),
         );
       }
     } finally {
@@ -151,12 +145,13 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Category Budgets',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.categoryBudgetsTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -201,7 +196,7 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: Text(
-                            category,
+                            CategoryL10n.name(l10n, category),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -216,7 +211,7 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.end,
                             decoration: InputDecoration(
-                              hintText: 'No limit',
+                              hintText: l10n.noLimit,
                               hintStyle: TextStyle(color: Colors.grey.shade400),
                               suffixText: ' DT',
                               suffixStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -257,8 +252,8 @@ class _CategoryBudgetsPageState extends State<CategoryBudgetsPage> {
                   ),
                 ),
                 onPressed: _saveBudgets,
-                child: const Text(
-                  'Save Budgets',
+                child: Text(
+                  l10n.save,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

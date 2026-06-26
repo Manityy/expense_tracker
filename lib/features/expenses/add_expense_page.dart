@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../constants/expense_categories.dart';
 import '../../services/firestore_service.dart';
 import '../../services/ai_service.dart';
 import '../../services/storage_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/category_l10n.dart';
 import '../../utils/expense_date_utils.dart';
 
 class AddExpensePage extends StatefulWidget {
@@ -175,7 +177,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     if (picked != null) setState(() => selectedDate = picked);
   }
 
-  Future<void> _pickReceipt() async {
+  Future<void> _pickReceipt(AppLocalizations l10n) async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -187,12 +189,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take photo'),
+              title: Text(l10n.takePhoto),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(l10n.chooseFromGallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -208,13 +210,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
     }
   }
 
-  Future<void> _save() async {
+  Future<void> _save(AppLocalizations l10n) async {
     final title = titleController.text.trim();
     final amountText = amountController.text.trim();
 
     if (title.isEmpty || amountText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        SnackBar(content: Text(l10n.fillAllFields)),
       );
       return;
     }
@@ -222,7 +224,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid amount')),
+        SnackBar(content: Text(l10n.validAmountRequired)),
       );
       return;
     }
@@ -259,7 +261,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              widget.isEditing ? 'Expense updated' : 'Expense saved successfully',
+              widget.isEditing ? l10n.expenseUpdated : l10n.expenseSaved,
             ),
           ),
         );
@@ -289,13 +291,16 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   @override
   Widget build(BuildContext context) {
-    final dateLabel = DateFormat('EEE, MMM d, yyyy').format(selectedDate);
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
+    final dateLabel =
+        DateFormat('EEE, MMM d, yyyy', locale).format(selectedDate);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(
-          widget.isEditing ? 'Edit Expense' : 'Add Expense',
+          widget.isEditing ? l10n.editExpense : l10n.addExpense,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -323,10 +328,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 children: [
                   TextField(
                     controller: titleController,
-                    decoration: const InputDecoration(
-                      labelText: 'Expense Title',
-                      hintText: 'e.g., Carrefour groceries',
-                      border: UnderlineInputBorder(),
+                    decoration: InputDecoration(
+                      labelText: l10n.expenseTitleLabel,
+                      hintText: l10n.expenseTitleHint,
+                      border: const UnderlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -335,30 +340,30 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Amount',
+                    decoration: InputDecoration(
+                      labelText: l10n.amount,
                       suffixText: 'DT',
-                      border: UnderlineInputBorder(),
+                      border: const UnderlineInputBorder(),
                     ),
                   ),
                   const SizedBox(height: 20),
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.calendar_today_outlined),
-                    title: const Text('Date'),
+                    title: Text(l10n.date),
                     subtitle: Text(dateLabel),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: _pickDate,
                   ),
                   const Divider(),
                   InputDecorator(
-                    decoration: const InputDecoration(
-                      labelText: 'Category',
-                      border: OutlineInputBorder(
+                    decoration: InputDecoration(
+                      labelText: l10n.category,
+                      border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(12)),
                       ),
                       contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     ),
                     child: DropdownButton<String>(
                       value: selectedCategory,
@@ -367,7 +372,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       items: expenseCategories.map((category) {
                         return DropdownMenuItem(
                           value: category,
-                          child: Text(category),
+                          child: Text(CategoryL10n.name(l10n, category)),
                         );
                       }).toList(),
                       onChanged: (value) {
@@ -390,7 +395,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Flousi is categorizing...',
+                          l10n.flousiCategorizing,
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 12,
@@ -412,12 +417,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   ],
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
-                    onPressed: _pickReceipt,
+                    onPressed: () => _pickReceipt(l10n),
                     icon: const Icon(Icons.receipt_long_outlined),
                     label: Text(
                       _receiptFile != null || receiptUrl != null
-                          ? 'Receipt attached'
-                          : 'Attach receipt photo',
+                          ? l10n.receiptAttached
+                          : l10n.attachReceiptPhoto,
                     ),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(48),
@@ -465,7 +470,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   borderRadius: BorderRadius.circular(28),
                 ),
               ),
-              onPressed: _isSaving ? null : _save,
+              onPressed: _isSaving ? null : () => _save(l10n),
               child: _isSaving
                   ? const SizedBox(
                       width: 22,
@@ -473,7 +478,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : Text(
-                      widget.isEditing ? 'Update Expense' : 'Save Expense',
+                      widget.isEditing ? l10n.updateExpense : l10n.saveExpense,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

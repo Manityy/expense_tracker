@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 
 class ExpenseDateUtils {
   static DateTime? parse(dynamic value) {
@@ -12,21 +13,7 @@ class ExpenseDateUtils {
     return date.year == month.year && date.month == month.month;
   }
 
-  static String monthLabel(DateTime date) {
-    const names = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return '${names[date.month - 1]} ${date.year}';
+  static String monthLabel(DateTime date, [String? locale]) {
+    return DateFormat.yMMMM(locale).format(date);
   }
 }

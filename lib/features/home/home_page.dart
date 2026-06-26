@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../providers/data_providers.dart';
 import '../expenses/add_expense_page.dart';
 import '../../widgets/dashboard_card.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/category_l10n.dart';
 import '../../utils/category_utils.dart';
 import '../../utils/expense_date_utils.dart';
 import '../../utils/expense_helpers.dart';
@@ -20,6 +22,7 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userModelStreamProvider);
     final expensesAsync = ref.watch(expensesStreamProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -49,7 +52,7 @@ class HomePage extends ConsumerWidget {
         error: (e, _) => Center(child: Text('$e')),
         data: (user) {
           if (user == null) {
-            return const Center(child: Text('Profile not found'));
+            return Center(child: Text(l10n.profileNotFound));
           }
 
           return expensesAsync.when(
@@ -65,13 +68,16 @@ class HomePage extends ConsumerWidget {
                   : 0.0;
               final usagePercentage =
                   salary > 0 ? (totalExpenses / salary) * 100 : 0;
-              final monthLabel = ExpenseDateUtils.monthLabel(DateTime.now());
+              final locale = Localizations.localeOf(context).toString();
+              final monthLabel =
+                  ExpenseDateUtils.monthLabel(DateTime.now(), locale);
               final forecast = FinanceHelpers.calculateForecast(
                 salary: salary,
                 monthSpent: totalExpenses,
               );
               final spending = ExpenseHelpers.categorySpending(expenses);
-              final insight = FinanceHelpers.generateInsight(
+              final insight = FinanceHelpers.generateLocalizedInsight(
+                l10n: l10n,
                 salary: salary,
                 monthSpent: totalExpenses,
                 categorySpending: spending,
@@ -95,21 +101,27 @@ class HomePage extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TunisianWelcomeHeader(name: user.name),
+                      TunisianWelcomeHeader(
+                        greeting: l10n.welcomeGreeting(user.name),
+                        subtitle: l10n.welcomeSubtitle,
+                      ),
                       const SizedBox(height: 20),
                       _buildIncomeSection(
+                        context: context,
+                        l10n: l10n,
                         salary: salary,
                         monthLabel: monthLabel,
                         totalExpenses: totalExpenses,
                         remaining: remaining,
                       ),
                       const SizedBox(height: 20),
-                      _buildUsageCard(usagePercentage),
+                      _buildUsageCard(l10n, usagePercentage),
                       const SizedBox(height: 20),
-                      _buildForecastCard(forecast, salary),
+                      _buildForecastCard(l10n, forecast, salary),
                       const SizedBox(height: 20),
                       if (savingsGoal > 0)
                         _buildSavingsCard(
+                          l10n: l10n,
                           savingsGoal: savingsGoal,
                           remaining: remaining,
                           goalProgress: goalProgress,
@@ -121,15 +133,16 @@ class HomePage extends ConsumerWidget {
                       ],
                       _buildBudgetsCard(
                         context: context,
+                        l10n: l10n,
                         activeBudgets: activeBudgets,
                         spending: spending,
                       ),
                       const SizedBox(height: 20),
-                      _buildAiCard(context),
+                      _buildAiCard(context, l10n),
                       const SizedBox(height: 20),
-                      const Text(
-                        'Recent Transactions',
-                        style: TextStyle(
+                      Text(
+                        l10n.recentTransactions,
+                        style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
@@ -137,7 +150,7 @@ class HomePage extends ConsumerWidget {
                       const SizedBox(height: 12),
                       if (recent.isEmpty)
                         Text(
-                          'No expenses yet. Tap + to add one.',
+                          l10n.noExpensesYet,
                           style: TextStyle(color: Colors.grey.shade600),
                         )
                       else
@@ -145,7 +158,10 @@ class HomePage extends ConsumerWidget {
                           final data = expense.data();
                           return ExpenseCard(
                             title: data['title'] as String? ?? '',
-                            category: data['category'] as String? ?? 'Other',
+                            category: CategoryL10n.name(
+                              l10n,
+                              data['category'] as String? ?? 'Other',
+                            ),
                             amount: '${data['amount']} DT',
                             icon: CategoryUtils.getIcon(data['category'] ?? 'Other'),
                             color: CategoryUtils.getColor(data['category'] ?? 'Other'),
@@ -173,11 +189,14 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildIncomeSection({
+    required BuildContext context,
+    required AppLocalizations l10n,
     required double salary,
-    required String monthLabel,
     required double totalExpenses,
     required double remaining,
+    required String monthLabel,
   }) {
+    final muted = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55);
     return Column(
       children: [
         Container(
@@ -193,13 +212,13 @@ class HomePage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Row(
+              Row(
                 children: [
-                  Icon(Icons.account_balance_wallet),
-                  SizedBox(width: 8),
+                  const Icon(Icons.account_balance_wallet),
+                  const SizedBox(width: 8),
                   Text(
-                    'Monthly Income',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    l10n.monthlyIncome,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -218,7 +237,7 @@ class HomePage extends ConsumerWidget {
         Text(
           monthLabel,
           style: TextStyle(
-            color: Colors.black.withValues(alpha: 0.55),
+            color: muted,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -227,7 +246,7 @@ class HomePage extends ConsumerWidget {
           children: [
             Expanded(
               child: DashboardCard(
-                title: 'Spent this month',
+                title: l10n.spentThisMonth,
                 value: '${totalExpenses.toStringAsFixed(0)} DT',
                 color: AppColors.harissaSoft,
                 icon: Icons.payments,
@@ -236,7 +255,7 @@ class HomePage extends ConsumerWidget {
             const SizedBox(width: 12),
             Expanded(
               child: DashboardCard(
-                title: 'Left this month',
+                title: l10n.remainingThisMonth,
                 value: '${remaining.toStringAsFixed(0)} DT',
                 color: remaining >= 0 ? AppColors.olive : AppColors.harissaSoft,
                 icon: Icons.savings,
@@ -248,14 +267,14 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildUsageCard(num usagePercentage) {
+  Widget _buildUsageCard(AppLocalizations l10n, num usagePercentage) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Text(
           usagePercentage > 100
-              ? '🚨 Warning: You have exceeded your monthly income'
-              : '⚠️ You have used ${usagePercentage.toStringAsFixed(1)}% of your monthly income',
+              ? '🚨 ${l10n.usageExceeded}'
+              : '⚠️ ${l10n.usagePercent(usagePercentage.toStringAsFixed(1))}',
           textAlign: TextAlign.center,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -263,7 +282,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildForecastCard(MonthForecast forecast, double salary) {
+  Widget _buildForecastCard(AppLocalizations l10n, MonthForecast forecast, double salary) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -277,21 +296,26 @@ class HomePage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.trending_up),
-              SizedBox(width: 8),
+              const Icon(Icons.trending_up),
+              const SizedBox(width: 8),
               Text(
-                'End-of-month forecast',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                l10n.endOfMonthForecast,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ],
           ),
           const SizedBox(height: 10),
           Text(
             forecast.projectedRemaining >= 0
-                ? 'On pace to finish with ~${forecast.projectedRemaining.toStringAsFixed(0)} DT left (${forecast.daysLeft} days left)'
-                : 'On pace to overspend by ~${(forecast.projectedSpend - salary).toStringAsFixed(0)} DT',
+                ? l10n.forecastOnPace(
+                    forecast.projectedRemaining.toStringAsFixed(0),
+                    forecast.daysLeft,
+                  )
+                : l10n.forecastOverspend(
+                    (forecast.projectedSpend - salary).toStringAsFixed(0),
+                  ),
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 15,
@@ -300,7 +324,7 @@ class HomePage extends ConsumerWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Daily average: ${forecast.dailyAverage.toStringAsFixed(0)} DT',
+            l10n.dailyAverage(forecast.dailyAverage.toStringAsFixed(0)),
             style: TextStyle(
               color: Colors.black.withValues(alpha: 0.55),
               fontSize: 13,
@@ -312,6 +336,7 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildSavingsCard({
+    required AppLocalizations l10n,
     required double savingsGoal,
     required double remaining,
     required double goalProgress,
@@ -322,15 +347,15 @@ class HomePage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '🌱 Savings Goal',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              l10n.savingsGoalTitle,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Goal'),
+                Text(l10n.goal),
                 Text('${savingsGoal.toStringAsFixed(0)} DT'),
               ],
             ),
@@ -338,7 +363,7 @@ class HomePage extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Current'),
+                Text(l10n.current),
                 Text('${remaining.toStringAsFixed(0)} DT'),
               ],
             ),
@@ -350,7 +375,7 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              remaining >= savingsGoal ? '🎉 Goal achieved!' : '💪 Keep saving!',
+              remaining >= savingsGoal ? l10n.goalAchieved : l10n.keepSaving,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
@@ -398,6 +423,7 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildBudgetsCard({
     required BuildContext context,
+    required AppLocalizations l10n,
     required List<MapEntry<String, double>> activeBudgets,
     required Map<String, double> spending,
   }) {
@@ -407,22 +433,22 @@ class HomePage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '📊 Category Budgets',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              '📊 ${l10n.categoryBudgetsTitle}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             if (activeBudgets.isEmpty) ...[
-              const Text(
-                'No category budgets set. Setup budget limits in your Profile to track category progress!',
-                style: TextStyle(color: Colors.grey, height: 1.4),
+              Text(
+                l10n.noCategoryBudgets,
+                style: const TextStyle(color: Colors.grey, height: 1.4),
               ),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: TextButton.icon(
                   icon: const Icon(Icons.settings),
-                  label: const Text('Setup Category Budgets'),
+                  label: Text(l10n.setupCategoryBudgets),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -446,10 +472,11 @@ class HomePage extends ConsumerWidget {
                 if (ratio >= 1.0) {
                   barColor = AppColors.pink;
                   txtColor = Colors.red.shade900;
-                  alertText = ' 🚨 Exceeded by ${(spent - limit).toStringAsFixed(0)} DT!';
+                  alertText =
+                      ' 🚨 ${l10n.budgetExceededBy((spent - limit).toStringAsFixed(0))}';
                 } else if (ratio >= 0.8) {
                   barColor = AppColors.yellow;
-                  alertText = ' ⚠️ 80%+ spent';
+                  alertText = ' ⚠️ ${l10n.budgetEightyPercent}';
                 } else {
                   barColor = AppColors.sage;
                 }
@@ -466,7 +493,7 @@ class HomePage extends ConsumerWidget {
                               Text(CategoryUtils.getIcon(category),
                                   style: const TextStyle(fontSize: 16)),
                               const SizedBox(width: 6),
-                              Text(category,
+                              Text(CategoryL10n.name(l10n, category),
                                   style: const TextStyle(fontWeight: FontWeight.w600)),
                               if (alertText.isNotEmpty)
                                 Text(
@@ -510,27 +537,25 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildAiCard(BuildContext context) {
+  Widget _buildAiCard(BuildContext context, AppLocalizations l10n) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '🤖 Flousi AI Assistant',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            Text(
+              '🤖 ${l10n.flousiAiAssistant}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Need help managing your money? Ask Flousi AI for personalized financial advice.',
-            ),
+            Text(l10n.flousiAiSubtitle),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.smart_toy),
-                label: const Text('Chat with AI'),
+                label: Text(l10n.chatWithAi),
                 onPressed: () {
                   Navigator.push(
                     context,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../services/firestore_service.dart';
 import '../../models/conversation_model.dart';
 import '../../utils/app_colors.dart';
@@ -16,49 +17,46 @@ class _ConversationsPageState extends State<ConversationsPage> {
   final firestoreService = FirestoreService();
   final String userId = FirebaseAuth.instance.currentUser!.uid;
 
-  String formatRelativeTime(DateTime dateTime) {
+  String formatRelativeTime(DateTime dateTime, AppLocalizations l10n) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
     if (difference.inSeconds < 60) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
+      return l10n.today;
     } else if (difference.inDays == 1) {
-      return 'Yesterday';
+      return l10n.yesterday;
     } else if (difference.inDays < 7) {
-      return '${difference.inDays} days ago';
+      return '${difference.inDays}d';
     } else {
       return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
     }
   }
 
   Future<void> _confirmDelete(String conversationId, String title) async {
+    final l10n = AppLocalizations.of(context)!;
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Delete Chat'),
+              const Icon(Icons.warning_amber_rounded, color: Colors.red),
+              const SizedBox(width: 8),
+              Text(l10n.deleteChat),
             ],
           ),
-          content: Text('Are you sure you want to delete "$title"? This action cannot be undone.'),
+          content: Text(l10n.deleteChatConfirm(title)),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel, style: const TextStyle(color: Colors.grey)),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Delete', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.delete, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
             ),
           ],
         );
@@ -66,12 +64,11 @@ class _ConversationsPageState extends State<ConversationsPage> {
     );
 
     if (confirm == true) {
-      // Show snackbar during deletion
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Deleting chat...'),
-            duration: Duration(milliseconds: 500),
+          SnackBar(
+            content: Text(l10n.deletingChat),
+            duration: const Duration(milliseconds: 500),
           ),
         );
       }
@@ -81,12 +78,13 @@ class _ConversationsPageState extends State<ConversationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text(
-          'Flousi AI Assistant',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          l10n.flousiAiAssistant,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -137,17 +135,17 @@ class _ConversationsPageState extends State<ConversationsPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'No Chats Yet',
-                      style: TextStyle(
+                    Text(
+                      l10n.noChatsYet,
+                      style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'Ask Flousi AI for financial insights, saving strategies, or transaction analysis!',
+                    Text(
+                      l10n.aiConversationsEmpty,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
@@ -202,7 +200,7 @@ class _ConversationsPageState extends State<ConversationsPage> {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 4.0),
                     child: Text(
-                      formatRelativeTime(conversation.createdAt),
+                      formatRelativeTime(conversation.createdAt, l10n),
                       style: const TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -237,9 +235,9 @@ class _ConversationsPageState extends State<ConversationsPage> {
           );
         },
         icon: const Icon(Icons.add_comment),
-        label: const Text(
-          'New Chat',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        label: Text(
+          l10n.newChat,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         backgroundColor: AppColors.lavender,
         foregroundColor: Colors.deepPurple.shade900,

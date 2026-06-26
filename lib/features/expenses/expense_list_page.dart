@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 
+import '../../constants/expense_categories.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/category_l10n.dart';
 import '../../utils/category_utils.dart';
 import '../../widgets/expense_card.dart';
 import '../../widgets/tunisian_motif.dart';
@@ -22,20 +25,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
   final _searchController = TextEditingController();
   String? _selectedCategory;
 
-  static const _categories = [
-    'All',
-    'Rent',
-    'Bills',
-    'Food',
-    'Groceries',
-    'Transport',
-    'Entertainment',
-    'Healthcare',
-    'Education',
-    'Shopping',
-    'Savings',
-    'Other',
-  ];
+  static const _categories = ['All', ...expenseCategories];
 
   @override
   void dispose() {
@@ -50,23 +40,20 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
     return null;
   }
 
-  String _formatDateHeader(DateTime date) {
+  String _formatDateHeader(DateTime date, AppLocalizations l10n) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final expenseDay = DateTime(date.year, date.month, date.day);
+    final locale = Localizations.localeOf(context).toString();
 
-    if (expenseDay == today) return 'Today';
+    if (expenseDay == today) return l10n.today;
     if (expenseDay == today.subtract(const Duration(days: 1))) {
-      return 'Yesterday';
+      return l10n.yesterday;
     }
-    return DateFormat('EEEE, MMM d').format(date);
+    return DateFormat('EEEE, MMM d', locale).format(date);
   }
 
-  String _formatTime(DateTime date) {
-    return DateFormat('h:mm a').format(date);
-  }
-
-  Future<bool> _confirmDelete(BuildContext context) async {
+  Future<bool> _confirmDelete(BuildContext context, AppLocalizations l10n) async {
     return await showDialog<bool>(
           context: context,
           builder: (context) {
@@ -74,21 +61,19 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
-              title: const Text('Delete Expense'),
-              content: const Text(
-                'Are you sure you want to delete this expense?',
-              ),
+              title: Text(l10n.deleteExpense),
+              content: Text(l10n.deleteExpenseConfirm),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
+                  child: Text(l10n.cancel),
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(context, true),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.redAccent,
                   ),
-                  child: const Text('Delete'),
+                  child: Text(l10n.delete),
                 ),
               ],
             );
@@ -140,11 +125,13 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser!.uid;
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
 
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('My Expenses'),
+        title: Text(l10n.myExpenses),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -156,7 +143,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
         backgroundColor: AppColors.lavender,
         foregroundColor: Colors.deepPurple.shade900,
         icon: const Icon(Icons.add),
-        label: const Text('Add Expense'),
+        label: Text(l10n.addExpense),
         elevation: 2,
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -168,7 +155,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
 
           if (snapshot.hasError) {
             return Center(
-              child: Text('Error loading expenses: ${snapshot.error}'),
+              child: Text(l10n.errorLoadingExpenses('${snapshot.error}')),
             );
           }
 
@@ -178,8 +165,8 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
             return TunisianEmptyState(
               embedded: true,
               icon: Icons.receipt_long_outlined,
-              title: 'No expenses yet',
-              subtitle: 'Track your spending by adding your first expense.',
+              title: l10n.noExpensesYetShort,
+              subtitle: l10n.noExpensesYetSubtitle,
               showPalm: false,
               action: FilledButton.icon(
                 onPressed: () {
@@ -191,7 +178,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                   );
                 },
                 icon: const Icon(Icons.add),
-                label: const Text('Add Expense'),
+                label: Text(l10n.addExpense),
               ),
             );
           }
@@ -232,7 +219,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  '${filtered.length} expense${filtered.length == 1 ? '' : 's'}',
+                                  l10n.expensesCount(filtered.length),
                                   style: TextStyle(
                                     color: Colors.black.withValues(alpha: 0.6),
                                     fontWeight: FontWeight.w500,
@@ -265,7 +252,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                       controller: _searchController,
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
-                        hintText: 'Search expenses...',
+                        hintText: l10n.searchExpenses,
                         prefixIcon: const Icon(Icons.search),
                         suffixIcon: _searchController.text.isNotEmpty
                             ? IconButton(
@@ -293,7 +280,11 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                               : _selectedCategory == category;
 
                           return FilterChip(
-                            label: Text(category),
+                            label: Text(
+                              isAll
+                                  ? l10n.all
+                                  : CategoryL10n.name(l10n, category),
+                            ),
                             selected: isSelected,
                             showCheckmark: false,
                             selectedColor: AppColors.lavender,
@@ -333,7 +324,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                             ),
                             const SizedBox(height: 12),
                             Text(
-                              'No matching expenses',
+                              l10n.noMatchingExpenses,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -362,7 +353,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                                   bottom: 8,
                                 ),
                                 child: Text(
-                                  _formatDateHeader(headerDate),
+                                  _formatDateHeader(headerDate, l10n),
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -398,7 +389,7 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                                     ),
                                   ),
                                   confirmDismiss: (_) =>
-                                      _confirmDelete(context),
+                                      _confirmDelete(context, l10n),
                                   onDismissed: (_) {
                                     firestoreService.deleteExpense(doc.id);
                                   },
@@ -416,11 +407,12 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
                                     },
                                     child: ExpenseCard(
                                       title: expense['title'] as String? ?? '',
-                                      category: category,
+                                      category: CategoryL10n.name(l10n, category),
                                       amount: '${amount.toStringAsFixed(0)} DT',
                                       icon: CategoryUtils.getIcon(category),
                                       color: CategoryUtils.getColor(category),
-                                      dateLabel: _formatTime(date),
+                                      dateLabel: DateFormat('h:mm a', locale)
+                                          .format(date),
                                     ),
                                   ),
                                 );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../services/ai_service.dart';
 import '../../services/firestore_service.dart';
 import '../../models/chat_message_model.dart';
@@ -161,10 +162,12 @@ class _ChatbotPageState extends State<ChatbotPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final thinkingText = l10n.flousiThinking;
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Flousi AI 🤖', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text('${l10n.flousiAiAssistant} 🤖', style: const TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.black,
@@ -173,7 +176,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
         children: [
           Expanded(
             child: _messagesStream == null
-                ? _buildEmptyChatState()
+                ? _buildEmptyChatState(l10n)
                 : StreamBuilder<List<ChatMessageModel>>(
                     stream: _messagesStream,
                     builder: (context, snapshot) {
@@ -192,13 +195,13 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       if (isLoading) {
                         displayMessages.add(ChatMessageModel(
                           sender: 'bot',
-                          text: 'Thinking...',
+                          text: thinkingText,
                           timestamp: DateTime.now(),
                         ));
                       }
 
                       if (displayMessages.isEmpty) {
-                        return _buildEmptyChatState();
+                        return _buildEmptyChatState(l10n);
                       }
 
                       // Reverse messages so index 0 is visual bottom (latest message)
@@ -212,7 +215,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                           final message = reversedMessages[index];
                           final isUser = message.sender == 'user';
 
-                          if (message.text == 'Thinking...') {
+                          if (message.text == thinkingText) {
                             return Align(
                               alignment: Alignment.centerLeft,
                               child: Container(
@@ -236,7 +239,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
                                     ),
                                     const SizedBox(width: 8),
                                     Text(
-                                      'Flousi is thinking...',
+                                      thinkingText,
                                       style: TextStyle(
                                         color: Colors.grey.shade600,
                                         fontStyle: FontStyle.italic,
@@ -313,9 +316,9 @@ class _ChatbotPageState extends State<ChatbotPage> {
                       controller: messageController,
                       minLines: 1,
                       maxLines: 4,
-                      decoration: const InputDecoration(
-                        hintText: 'Ask Flousi something...',
-                        hintStyle: TextStyle(color: Colors.grey),
+                      decoration: InputDecoration(
+                        hintText: l10n.askFlousi,
+                        hintStyle: const TextStyle(color: Colors.grey),
                         border: InputBorder.none,
                       ),
                     ),
@@ -340,7 +343,7 @@ class _ChatbotPageState extends State<ChatbotPage> {
     );
   }
 
-  Widget _buildEmptyChatState() {
+  Widget _buildEmptyChatState(AppLocalizations l10n) {
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(32),
@@ -356,18 +359,18 @@ class _ChatbotPageState extends State<ChatbotPage> {
               child: const Text('💡', style: TextStyle(fontSize: 36)),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Start a New Conversation',
-              style: TextStyle(
+            Text(
+              l10n.newChat,
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Ask me questions about your monthly budget, recent transactions, tips to reach your savings goals, or general personal finance questions.',
+            Text(
+              l10n.flousiAiSubtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, height: 1.5),
+              style: const TextStyle(color: Colors.grey, height: 1.5),
             ),
           ],
         ),

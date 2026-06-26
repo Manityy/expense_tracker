@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../services/firestore_service.dart';
 import 'monthly_trend_page.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/expense_date_utils.dart';
 import '../../utils/analytics_helpers.dart';
+import '../../utils/category_l10n.dart';
 import '../../utils/category_utils.dart';
 import '../../models/user_model.dart';
 import '../../widgets/tunisian_motif.dart';
@@ -23,6 +25,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   int _touchedCategory = -1;
   int _reloadToken = 0;
   DateTime _selectedMonth = DateTime(DateTime.now().year, DateTime.now().month);
+  late Future<Map<String, dynamic>> _analyticsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _analyticsFuture = _loadAnalyticsData();
+  }
 
   Future<Map<String, dynamic>> _loadAnalyticsData() {
     final userId = FirebaseAuth.instance.currentUser!.uid;
@@ -57,27 +66,30 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     setState(() {
       _reloadToken++;
       _touchedCategory = -1;
+      _analyticsFuture = _loadAnalyticsData();
     });
-    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await _analyticsFuture;
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final locale = Localizations.localeOf(context).toString();
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Analytics'),
+        title: Text(l10n.analytics),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         key: ValueKey(_reloadToken),
-        future: _loadAnalyticsData(),
+        future: _analyticsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
           if (!snapshot.hasData) {
-            return const Center(child: Text('Unable to load analytics'));
+            return Center(child: Text(l10n.unableToLoadAnalytics));
           }
 
           final data = snapshot.data!;
@@ -89,8 +101,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             return TunisianEmptyState(
               embedded: true,
               icon: Icons.pie_chart_outline,
-              title: 'No expenses yet',
-              subtitle: 'Start tracking to unlock analytics.',
+              title: l10n.noExpensesYetShort,
+              subtitle: l10n.analyticsEmptySubtitle,
             );
           }
 
@@ -139,7 +151,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 padding: const EdgeInsets.all(20),
                 children: [
                   _MonthBanner(
-                    label: ExpenseDateUtils.monthLabel(month),
+                    label: ExpenseDateUtils.monthLabel(month, locale),
+                    changeLabel: l10n.change,
                     onTap: _pickMonth,
                   ),
                   const SizedBox(height: 40),
@@ -147,7 +160,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       size: 56, color: Colors.grey.shade400),
                   const SizedBox(height: 16),
                   Text(
-                    'No expenses in ${ExpenseDateUtils.monthLabel(month)}',
+                    l10n.noExpensesInMonth(
+                      ExpenseDateUtils.monthLabel(month, locale),
+                    ),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 18,
@@ -156,7 +171,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Pick another month or add an expense.',
+                    l10n.pickAnotherMonth,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
@@ -174,7 +189,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _MonthBanner(
-                    label: ExpenseDateUtils.monthLabel(month),
+                    label: ExpenseDateUtils.monthLabel(month, locale),
+                    changeLabel: l10n.change,
                     onTap: _pickMonth,
                   ),
                   const SizedBox(height: 16),
@@ -182,7 +198,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     children: [
                       Expanded(
                         child: _StatCard(
-                          label: 'Spent',
+                          label: l10n.spent,
                           value: '${grandTotal.toStringAsFixed(0)} DT',
                           color: AppColors.pink,
                           icon: Icons.payments_outlined,
@@ -191,7 +207,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _StatCard(
-                          label: 'Remaining',
+                          label: l10n.remaining,
                           value: '${remaining.toStringAsFixed(0)} DT',
                           color: remaining >= 0 ? AppColors.sage : AppColors.pink,
                           icon: Icons.savings_outlined,
@@ -204,7 +220,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     children: [
                       Expanded(
                         child: _StatCard(
-                          label: 'Of income',
+                          label: l10n.ofIncome,
                           value: salary > 0
                               ? '${usagePct.toStringAsFixed(0)}%'
                               : '—',
@@ -215,7 +231,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: _StatCard(
-                          label: 'Transactions',
+                          label: l10n.transactions,
                           value: '${monthExpenses.length}',
                           color: AppColors.saffron,
                           icon: Icons.receipt_long_outlined,
@@ -224,9 +240,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'By category',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.byCategory,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -301,7 +317,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     const SizedBox(width: 8),
                                     Expanded(
                                       child: Text(
-                                        entry.key,
+                                        CategoryL10n.name(l10n, entry.key),
                                         style: const TextStyle(
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -327,7 +343,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  '${(pct * 100).toStringAsFixed(0)}% of spending',
+                                  l10n.percentOfSpending(
+                                    (pct * 100).toStringAsFixed(0),
+                                  ),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: Colors.grey.shade600,
@@ -341,9 +359,9 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    '6-month spending',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    l10n.sixMonthSpending,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Container(
@@ -400,7 +418,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                                     return const SizedBox.shrink();
                                   }
                                   return Text(
-                                    AnalyticsHelpers.formatMonthKey(last6[i].key)
+                                    AnalyticsHelpers.formatMonthKey(
+                                      last6[i].key,
+                                      locale,
+                                    )
                                         .split(' ')
                                         .first,
                                     style: TextStyle(
@@ -461,21 +482,21 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                               child: const Icon(Icons.insights),
                             ),
                             const SizedBox(width: 16),
-                            const Expanded(
+                            Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Full monthly history',
-                                    style: TextStyle(
+                                    l10n.fullMonthlyHistory,
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    'Trends, averages & month-over-month',
-                                    style: TextStyle(
+                                    l10n.fullMonthlyHistorySubtitle,
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey,
                                     ),
@@ -501,9 +522,14 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
 class _MonthBanner extends StatelessWidget {
   final String label;
+  final String changeLabel;
   final VoidCallback onTap;
 
-  const _MonthBanner({required this.label, required this.onTap});
+  const _MonthBanner({
+    required this.label,
+    required this.changeLabel,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -529,7 +555,7 @@ class _MonthBanner extends StatelessWidget {
                 ),
               ),
               Text(
-                'Change',
+                changeLabel,
                 style: TextStyle(
                   color: AppColors.sidiBlue,
                   fontWeight: FontWeight.w600,

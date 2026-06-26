@@ -10,6 +10,8 @@ import '../../utils/app_colors.dart';
 import '../../models/user_model.dart';
 import '../../services/firestore_service.dart';
 import '../../services/export_service.dart';
+import 'app_settings_section.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -37,10 +39,12 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(l10n.profile),
       ),
       body: FutureBuilder<Map<String, dynamic>>(
         future: _loadProfileData(),
@@ -50,7 +54,7 @@ class ProfilePage extends StatelessWidget {
           }
 
           if (!snapshot.hasData) {
-            return const Center(child: Text('Unable to load profile'));
+            return Center(child: Text(l10n.unableToLoadProfile));
           }
 
           final data = snapshot.data!;
@@ -62,7 +66,7 @@ class ProfilePage extends StatelessWidget {
           final totalExpenses = data['totalExpenses'] as double;
 
           if (!userDoc.exists) {
-            return const Center(child: Text('User document not found'));
+            return Center(child: Text(l10n.userNotFound));
           }
 
           final userModel = UserModel.fromMap(userDoc.data()!);
@@ -93,11 +97,15 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
+                const AppSettingsSection(),
+
+                const SizedBox(height: 24),
+
                 Row(
                   children: [
                     Expanded(
                       child: _StatCard(
-                        label: 'Monthly Income',
+                        label: l10n.monthlyIncome,
                         value: '${userModel.salary.toStringAsFixed(0)} DT',
                         color: AppColors.yellow,
                         icon: Icons.account_balance_wallet_outlined,
@@ -106,7 +114,7 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: _StatCard(
-                        label: 'Remaining this month',
+                        label: l10n.remainingThisMonth,
                         value: '${remaining.toStringAsFixed(0)} DT',
                         color: remaining >= 0 ? AppColors.sage : AppColors.pink,
                         icon: Icons.savings_outlined,
@@ -177,15 +185,15 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 28),
 
-                _SectionLabel(title: 'Account'),
+                _SectionLabel(title: l10n.accountSettings),
                 const SizedBox(height: 8),
                 _SettingsGroup(
                   items: [
                     _ProfileMenuItem(
                       icon: Icons.payments_outlined,
                       iconColor: AppColors.yellow,
-                      title: 'Update Salary',
-                      subtitle: 'Manage your monthly income',
+                      title: l10n.updateSalary,
+                      subtitle: l10n.manageMonthlyIncome,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -198,8 +206,8 @@ class ProfilePage extends StatelessWidget {
                     _ProfileMenuItem(
                       icon: Icons.pie_chart_outline,
                       iconColor: AppColors.lavender,
-                      title: 'Category Budgets',
-                      subtitle: 'Set spending limits per category',
+                      title: l10n.categoryBudgets,
+                      subtitle: l10n.categoryBudgetsSubtitle,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -212,8 +220,8 @@ class ProfilePage extends StatelessWidget {
                     _ProfileMenuItem(
                       icon: Icons.download_outlined,
                       iconColor: AppColors.sage,
-                      title: 'Export Expenses',
-                      subtitle: 'Download CSV of all your expenses',
+                      title: l10n.exportExpenses,
+                      subtitle: l10n.exportExpensesSubtitle,
                       onTap: () async {
                         final userId = FirebaseAuth.instance.currentUser!.uid;
                         final expenses =
@@ -221,9 +229,7 @@ class ProfilePage extends StatelessWidget {
                         if (!context.mounted) return;
                         if (expenses.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('No expenses to export'),
-                            ),
+                            SnackBar(content: Text(l10n.noExpensesToExport)),
                           );
                           return;
                         }
@@ -233,10 +239,12 @@ class ProfilePage extends StatelessWidget {
                     _ProfileMenuItem(
                       icon: Icons.flag_outlined,
                       iconColor: AppColors.blue,
-                      title: 'Savings Goal',
+                      title: l10n.savingsGoal,
                       subtitle: userModel.savingsGoal > 0
-                          ? 'Goal: ${userModel.savingsGoal.toStringAsFixed(0)} DT'
-                          : 'Set a savings target',
+                          ? l10n.savingsGoalSet(
+                              userModel.savingsGoal.toStringAsFixed(0),
+                            )
+                          : l10n.savingsGoalUnset,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -251,17 +259,17 @@ class ProfilePage extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                _SectionLabel(title: 'Achievements'),
+                _SectionLabel(title: l10n.achievements),
                 const SizedBox(height: 8),
                 _SettingsGroup(
                   items: [
                     _ProfileMenuItem(
                       icon: Icons.emoji_events_outlined,
                       iconColor: AppColors.pink,
-                      title: 'My Challenges',
+                      title: l10n.myChallenges,
                       subtitle: completedCount > 0
-                          ? '$completedCount completed'
-                          : 'Complete challenges to earn badges',
+                          ? l10n.challengesCompleted(completedCount)
+                          : l10n.challengesEmpty,
                       trailing: completedCount > 0
                           ? Container(
                               padding: const EdgeInsets.symmetric(
@@ -305,21 +313,19 @@ class ProfilePage extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          title: const Text('Log out?'),
-                          content: const Text(
-                            'You will need to sign in again to access your data.',
-                          ),
+                          title: Text(l10n.logOutConfirmTitle),
+                          content: Text(l10n.logOutConfirmMessage),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Cancel'),
+                              child: Text(l10n.cancel),
                             ),
                             TextButton(
                               onPressed: () => Navigator.pop(context, true),
                               style: TextButton.styleFrom(
                                 foregroundColor: Colors.redAccent,
                               ),
-                              child: const Text('Log out'),
+                              child: Text(l10n.logOut),
                             ),
                           ],
                         ),
@@ -330,7 +336,7 @@ class ProfilePage extends StatelessWidget {
                       }
                     },
                     icon: const Icon(Icons.logout, size: 20),
-                    label: const Text('Log out'),
+                    label: Text(l10n.logOut),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.redAccent.shade700,
                       side: BorderSide(color: Colors.redAccent.shade200),

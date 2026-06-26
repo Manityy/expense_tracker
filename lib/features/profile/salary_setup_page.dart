@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 
 import '../../services/firestore_service.dart';
+
 class SalarySetupPage extends StatefulWidget {
   const SalarySetupPage({super.key});
 
@@ -15,9 +17,10 @@ class _SalarySetupPageState extends State<SalarySetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Set Your Salary'),
+        title: Text(l10n.setYourSalary),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -26,14 +29,12 @@ class _SalarySetupPageState extends State<SalarySetupPage> {
             TextField(
               controller: salaryController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Monthly Salary',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: l10n.monthlyIncome,
+                border: const OutlineInputBorder(),
               ),
             ),
-
             const SizedBox(height: 20),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -44,22 +45,21 @@ class _SalarySetupPageState extends State<SalarySetupPage> {
                       double.parse(salaryController.text),
                     );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Salary saved'),
-                      ),
-                    );
-
-                    Navigator.pop(context);
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(l10n.salarySaved)),
+                      );
+                      Navigator.pop(context);
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.toString()),
-                      ),
-                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(e.toString())),
+                      );
+                    }
                   }
                 },
-                child: const Text('Save Salary'),
+                child: Text(l10n.saveSalary),
               ),
             ),
           ],

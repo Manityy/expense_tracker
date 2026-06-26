@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:expense_tracker/l10n/app_localizations.dart';
 import '../../services/firestore_service.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/tunisian_motif.dart';
@@ -68,11 +69,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _next() {
+    final l10n = AppLocalizations.of(context)!;
     if (_step == 1) {
       final salary = double.tryParse(_salaryController.text.trim());
       if (salary == null || salary <= 0) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter a valid monthly income')),
+          SnackBar(content: Text(l10n.validIncomeRequired)),
         );
         return;
       }
@@ -86,6 +88,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: AppColors.background,
       body: TunisianMotifBackground(
@@ -142,7 +145,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                               },
                         child: _isSaving
                             ? const CircularProgressIndicator(strokeWidth: 2)
-                            : Text(_step < 2 ? 'Continue' : 'Finish setup'),
+                            : Text(_step < 2 ? l10n.continueBtn : l10n.finishSetup),
                       ),
                     ),
                     if (_step == 2) ...[
@@ -150,7 +153,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       TextButton(
                         onPressed:
                             _isSaving ? null : () => _finish(skipBudgets: true),
-                        child: const Text('Skip budget setup for now'),
+                        child: Text(l10n.skipBudgetSetup),
                       ),
                     ],
                   ],
@@ -171,6 +174,7 @@ class _WelcomeStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
@@ -192,13 +196,13 @@ class _WelcomeStep extends StatelessWidget {
           ),
           const SizedBox(height: 28),
           Text(
-            'Ahlan fi Flousi, $name!',
+            l10n.onboardingWelcome(name),
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'فلوسي — barra flousk',
+            l10n.onboardingTagline,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.sidiBlue.withValues(alpha: 0.7),
@@ -207,7 +211,7 @@ class _WelcomeStep extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'Let\'s set up your profile in 3 quick steps so your dashboard, budgets, and AI insights work correctly.',
+            l10n.onboardingIntro,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey.shade600, height: 1.5, fontSize: 15),
           ),
@@ -224,6 +228,7 @@ class _SalaryStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
@@ -232,21 +237,21 @@ class _SalaryStep extends StatelessWidget {
         children: [
           const Text('💰', style: TextStyle(fontSize: 40)),
           const SizedBox(height: 16),
-          const Text(
-            'Monthly income',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            l10n.monthlyIncomeSetup,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'This helps Flousi calculate how much you have left each month.',
+            l10n.monthlyIncomeSetupHint,
             style: TextStyle(color: Colors.grey.shade600, height: 1.4),
           ),
           const SizedBox(height: 24),
           TextField(
             controller: controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Salary',
+            decoration: InputDecoration(
+              labelText: l10n.salary,
               suffixText: 'DT',
             ),
           ),
@@ -263,6 +268,7 @@ class _SavingsStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
@@ -271,21 +277,21 @@ class _SavingsStep extends StatelessWidget {
         children: [
           const Text('🌱', style: TextStyle(fontSize: 40)),
           const SizedBox(height: 16),
-          const Text(
-            'Savings goal',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            l10n.savingsGoalSetup,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'Optional — set a target to track progress on your home screen.',
+            l10n.savingsGoalSetupHint,
             style: TextStyle(color: Colors.grey.shade600, height: 1.4),
           ),
           const SizedBox(height: 24),
           TextField(
             controller: controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Monthly savings target',
+            decoration: InputDecoration(
+              labelText: l10n.monthlySavingsTarget,
               suffixText: 'DT',
               hintText: '0',
             ),
